@@ -26,5 +26,7 @@ public class ReservationFerryResultDTO {
     
     private double somme;
     private double total;
+    
+    private String idcrypt;
 
 }

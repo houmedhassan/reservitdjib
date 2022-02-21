@@ -1,4 +1,4 @@
-package com.safara.entities;
+package com.safara.web;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.safara.entities.FerryDestination;
+import com.safara.entities.FerryTypeVehicule;
+import com.safara.entities.ReservationFerry;
 import com.safara.entities.administration.FerryTarif;
 import com.safara.entities.administration.RegionRepository;
 import com.safara.entities.dto.ReservationFerryDTO;
@@ -113,7 +116,11 @@ public class ReservationFerryController {
 				
 				reservationFerryRepository.save(ferry);
 			//}
-			
+
+				ferry.setIdcrypt(encoder.encode(ferry.getSafkey()+""));
+				
+				reservationFerryRepository.save(ferry);
+				
 			return new ResponseEntity<ReservationFerryResultDTO>(HttpStatus.OK);
 		}catch(Exception ex)
 		{

@@ -2,15 +2,21 @@ package com.safara.entities;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.safara.security.entities.User;
 
 import lombok.AllArgsConstructor;
@@ -45,6 +51,10 @@ public class ReservationFerry {
     private int vehicule;
     private String vehiculetype;
     
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER , mappedBy="reservation")
+	@JsonManagedReference
+	private Set<PassagerInformation> passagers = new HashSet<PassagerInformation>();
+    
 	@ManyToOne
 	@JoinColumn(referencedColumnName = "id", name = "created")
 	private User created;
@@ -53,5 +63,7 @@ public class ReservationFerry {
 	@ManyToOne
 	@JoinColumn(referencedColumnName = "id", name = "updated")
 	private User updated;
+	
+	private String idcrypt;
 	
 }

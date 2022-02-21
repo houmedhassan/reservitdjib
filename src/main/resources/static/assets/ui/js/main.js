@@ -514,26 +514,7 @@ Author Email:   contact@tecydevs.com
         $(rangeSliderAmountTwo).val( "$" + $(rangeSliderTwo).slider( "values", 0 ) +
             " - $" + $(rangeSliderTwo).slider( "values", 1 ) );
 
-        /*==== Date picker multiple =====*/
-        if ($(datePickerMultiple).length) {
-            $(datePickerMultiple).daterangepicker({
-                opens: 'right',
-                locale: {
-                    format: 'DD/MM/YYYY',
-                }
-            });
-        }
 
-        /*==== Date picker single =====*/
-        if ($(datePickerSingle).length) {
-            $(datePickerSingle).daterangepicker({
-                singleDatePicker: true,
-                opens: 'right',
-                locale: {
-                    format: 'DD/MM/YYYY',
-                }
-            });
-        }
 
         /*==== Bootstrap select picker =====*/
         if ($(bootstrapSelectMenu).length) {
