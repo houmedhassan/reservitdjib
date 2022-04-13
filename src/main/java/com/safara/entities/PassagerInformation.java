@@ -1,5 +1,6 @@
 package com.safara.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
@@ -35,7 +36,11 @@ public class PassagerInformation {
 	
 	private String nom;
 	private String tel;
-	private String adresse;
+	private String addresse;
+	
+	private String typepersonne; 
+	
+	private LocalDate datedepart;
 	
 	@ManyToOne
 	@JoinColumn(name="reffkey", referencedColumnName="safkey")
@@ -43,5 +48,7 @@ public class PassagerInformation {
 	private ReservationFerry reservation;
 
 	private LocalDateTime createdat;
+	
+	private String reference;
 	
 }

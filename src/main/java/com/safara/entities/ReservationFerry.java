@@ -51,6 +51,10 @@ public class ReservationFerry {
     private int vehicule;
     private String vehiculetype;
     
+    private String etape;
+    
+    private double montant;
+        
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER , mappedBy="reservation")
 	@JsonManagedReference
 	private Set<PassagerInformation> passagers = new HashSet<PassagerInformation>();
@@ -65,5 +69,13 @@ public class ReservationFerry {
 	private User updated;
 	
 	private String idcrypt;
+	
+	private String owner;
+	private String ownertel;
+	
+	private String refrence;
+	private String invoicenumber;
+	private String draftnbr;
+	
 	
 }

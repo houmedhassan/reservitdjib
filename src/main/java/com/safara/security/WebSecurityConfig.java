@@ -1,4 +1,6 @@
 package com.safara.security;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -73,35 +78,24 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter{
 	        
 	        http.addFilterBefore(authenticationJwtFilter(), UsernamePasswordAuthenticationFilter.class);
 	    }
-		/*
-	    @Bean
-	    public CorsFilter corsFilter() {
-	        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	        
-	        final CorsConfiguration config = new CorsConfiguration();
-	        config.setAllowCredentials(true);
-	        config.setAllowedOrigins(Collections.singletonList("*"));
-	        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Authorization"));
-	        
-	        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-	        source.registerCorsConfiguration("/**", config);
-	        /*
-	        config.setAllowCredentials(true);
-	        config.addAllowedOrigin("http://localhost:4200");
-	        config.addAllowedHeader("*");
-	        config.addAllowedMethod("OPTIONS");
-	        config.addAllowedMethod("GET");
-	        config.addAllowedMethod("POST");
-	        config.addAllowedMethod("PUT");
-	        config.addAllowedMethod("DELETE");
-	        source.registerCorsConfiguration("/**", config);
-	        */
-	        /*
-	        return new CorsFilter(source);
-	    }
-	    */
+		
+//	    @Bean
+//	    public CorsFilter corsFilter() {
+//	        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//
+//	    	        
+//	        final CorsConfiguration config = new CorsConfiguration();
+//	        config.setAllowCredentials(true);
+//	        config.setAllowedOrigins(Arrays.asList("http://localhost:8100/", "http://10.20.10.19/"));
+//	        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Authorization"));
+//	        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//	        
+//	        source.registerCorsConfiguration("/**", config);   
+//	        return new CorsFilter(source);
+//	        
+//	    }
 	    
+	    @Bean
 	    public WebMvcConfigurer corsConfigurer() {
 	        return new WebMvcConfigurer() {
 	            @Override

@@ -22,4 +22,11 @@ public interface PassagerInformationRepository extends JpaRepository<PassagerInf
 	 * @return
 	 */
 	public List<PassagerInformation> findByReservation(ReservationFerry reservation);
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public PassagerInformation findById(int id);
 }

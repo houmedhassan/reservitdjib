@@ -22,4 +22,10 @@ public interface ReservationFerryRepository extends JpaRepository<ReservationFer
 	 */
 	public ReservationFerry findByDatedepart(LocalDate datedepart);
 
+	/**
+	 * 
+	 * @param idcrypt
+	 * @return
+	 */
+	public ReservationFerry findByIdcrypt(String idcrypt);
 }

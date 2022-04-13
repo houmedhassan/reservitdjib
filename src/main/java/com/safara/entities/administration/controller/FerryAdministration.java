@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.safara.entities.PassagerInformation;
 import com.safara.entities.ReservationFerry;
 import com.safara.entities.administration.RegionRepository;
 import com.safara.repository.FerryDestinationRepository;
 import com.safara.repository.FerryTarifRepository;
 import com.safara.repository.FerryTypeCarsRepository;
+import com.safara.repository.PassagerInformationRepository;
 import com.safara.repository.ReservationFerryRepository;
 
 @CrossOrigin(origins = "*", maxAge = 360)
@@ -39,7 +41,10 @@ public class FerryAdministration {
 	private FerryTarifRepository ferryTarifRepository;
 	
 	@Autowired
-	private FerryDestinationRepository ferryDestinationRepository;
+	private FerryDestinationRepository ferryDestinationRepository;	
+	
+	@Autowired
+	private PassagerInformationRepository passagerInformationRepository;
 	
 	@Autowired
     PasswordEncoder encoder;
@@ -55,6 +60,23 @@ public class FerryAdministration {
 			return new ResponseEntity<List<ReservationFerry>>(HttpStatus.FORBIDDEN);
 		}
 	}
+	
+	
+
+	
+	@GetMapping("/find/reservation/passagers")
+	public ResponseEntity<List<PassagerInformation>> passagers()
+	{
+		try {
+			return new ResponseEntity<List<PassagerInformation>>(passagerInformationRepository.findAll(), HttpStatus.OK);
+		}catch(Exception ex)
+		{
+	
+			return new ResponseEntity<List<PassagerInformation>>(HttpStatus.FORBIDDEN);
+		}
+		
+	} 
+	
 	
 	
 	

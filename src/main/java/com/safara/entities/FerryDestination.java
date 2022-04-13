@@ -31,8 +31,9 @@ public class FerryDestination {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int sfidkey;
 	private String name;
+	private String arrive;
 	
-	private LocalDateTime createdat;
+	private LocalDateTime createdat; 
 	@ManyToOne
 	@JoinColumn(referencedColumnName = "id", name = "created")
 	private User created;

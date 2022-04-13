@@ -8,7 +8,7 @@ import lombok.Setter;
 public class PassagerinfoDTO {
 	
 	private int id;
-	private int typepersonne;
+	private String typepersonne;
 	private String nom;
 	private int tel;
 	private String addresse;
