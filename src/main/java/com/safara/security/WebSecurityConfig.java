@@ -82,17 +82,15 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter{
 //	    @Bean
 //	    public CorsFilter corsFilter() {
 //	        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//
 //	    	        
 //	        final CorsConfiguration config = new CorsConfiguration();
 //	        config.setAllowCredentials(true);
-//	        config.setAllowedOrigins(Arrays.asList("http://localhost:8100/", "http://10.20.10.19/"));
+//	        config.setAllowedOrigins(Arrays.asList("http://localhost:8100/", "http://localhost:8030/", "https://wahasir.herokuapp.com/"));
 //	        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Authorization"));
 //	        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 //	        
 //	        source.registerCorsConfiguration("/**", config);   
-//	        return new CorsFilter(source);
-//	        
+//	        return new CorsFilter(source);	        
 //	    }
 	    
 	    @Bean
