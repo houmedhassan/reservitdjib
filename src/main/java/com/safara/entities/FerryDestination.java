@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.safara.security.entities.User;
 
 import lombok.AllArgsConstructor;
@@ -34,11 +35,15 @@ public class FerryDestination {
 	private String arrive;
 	
 	private LocalDateTime createdat; 
+	
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(referencedColumnName = "id", name = "created")
 	private User created;
 	
 	private LocalDateTime updatedat;
+	
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(referencedColumnName = "id", name = "updated")
 	private User updated;

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.safara.entities.FerryDestination;
 import com.safara.entities.FerryTypeVehicule;
+import com.safara.entities.ParametreReservationFerry;
 import com.safara.entities.ReservationFerry;
 import com.safara.entities.administration.FerryTarif;
 import com.safara.entities.administration.RegionRepository;
@@ -28,6 +30,7 @@ import com.safara.entities.dto.ReservationFerryResultDTO;
 import com.safara.repository.FerryDestinationRepository;
 import com.safara.repository.FerryTarifRepository;
 import com.safara.repository.FerryTypeCarsRepository;
+import com.safara.repository.ParametreReservationFerryRepository;
 import com.safara.repository.PassagerInformationRepository;
 import com.safara.repository.ReservationFerryRepository;
 
@@ -40,6 +43,9 @@ public class ReservationFerryController {
 	
 	@Autowired
 	private RegionRepository regionRepository;
+	
+	@Autowired
+	private ParametreReservationFerryRepository parametreReservationFerryRepository;
 	
 	
 	@Autowired
@@ -61,6 +67,34 @@ public class ReservationFerryController {
 	@Autowired
     PasswordEncoder encoder;
 
+	
+	
+	public ResponseEntity<ParametreReservationFerry> findJourDestination(@RequestParam("date") LocalDate date)
+	{
+		try {
+			
+			String jour = date.getDayOfWeek().name();
+			
+			return new ResponseEntity<ParametreReservationFerry>(HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			return new ResponseEntity<ParametreReservationFerry>(HttpStatus.FORBIDDEN);
+		}
+	}
+	
+	
+
+	@GetMapping("/liste/Parametre/destination")
+	public ResponseEntity<List<ParametreReservationFerry>> findJourDestinations()
+	{
+		try {
+			return new ResponseEntity<List<ParametreReservationFerry>>(parametreReservationFerryRepository.findAll(), HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			return new ResponseEntity<List<ParametreReservationFerry>>(HttpStatus.FORBIDDEN);
+		}
+	} 
+	
 	
 	/**
 	 * 
@@ -304,6 +338,9 @@ public class ReservationFerryController {
 	public ResponseEntity<ReservationFerryResultDTO> saveMobileReservation(@RequestBody  ReservationFerryMobileDTO mobile){
 		
 		try {
+
+			System.out.println(mobile.toString());
+			
 			double somme=0;
 			
 			List<FerryTarif> tarrifs =ferryTarifRepository.findAll();			
@@ -312,8 +349,11 @@ public class ReservationFerryController {
 			{
 				if(mobile.getNbadulte() > 0 && tarif.getSfidkey() == 1)
 				{  somme += tarif.getMontant() * mobile.getNbadulte();}
+
+				if(mobile.getNbstudent() > 0 && tarif.getSfidkey() == 2)
+				{  somme += tarif.getMontant() * mobile.getNbstudent();}
 				
-				if(mobile.getNbenfant() > 0 && tarif.getSfidkey() == 2)
+				if(mobile.getNbenfant() > 0 && tarif.getSfidkey() == 3)
 				{ somme += tarif.getMontant() * mobile.getNbenfant();}
 			}
 
@@ -361,8 +401,12 @@ public class ReservationFerryController {
 		}
 		
 	}
-	
-	
+
+	/**
+	 *
+	 * @param idcrypt
+	 * @return  object of reservation finding by idcrypt
+	 */
 	@GetMapping("/find/reservation/ferry/mobile/one")
 	public ResponseEntity<ReservationFerryResultDTO> findReservationMobile(@RequestParam("idcrypt") String idcrypt)
 	{
@@ -394,8 +438,27 @@ public class ReservationFerryController {
 			return new ResponseEntity<ReservationFerryResultDTO>(HttpStatus.FORBIDDEN);
 		}
 	}
+		
 	
-	
-	
+	/**
+	 * VERIFIER SI UN BOOKING EST POSSIBLE POUR LA DESTINATION 
+	 */
+	@GetMapping("/find/reservation/ferry/verification/destination")
+	public ResponseEntity<ParametreReservationFerry> verificationDestination(@RequestParam("date") String date)
+	{
+		try {
+			
+			String jour = LocalDate.parse(date).getDayOfWeek().name();
+			System.out.println("DATE : "+date+ " JOUR : "+jour);
+			
+			ParametreReservationFerry ferry = parametreReservationFerryRepository.findByJour(jour);
+			
+			return new ResponseEntity<ParametreReservationFerry>(ferry, HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			return new ResponseEntity<ParametreReservationFerry>(HttpStatus.FORBIDDEN);
+		}
+
+	}
 	
 }

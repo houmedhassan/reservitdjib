@@ -44,6 +44,7 @@ public class ReservationFerry {
     private LocalDate dateretour;
 
     private int nbadult;
+    private int nbstudent;
     private int nbchild;
     
     private String status;
