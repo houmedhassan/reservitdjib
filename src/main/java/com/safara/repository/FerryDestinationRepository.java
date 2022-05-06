@@ -13,4 +13,27 @@ public interface FerryDestinationRepository extends JpaRepository<FerryDestinati
 	 */
 	public FerryDestination findBySfidkey(int id);
 
+	/**
+	 *
+	 * @param arrive
+	 * @return
+	 */
+	public FerryDestination findByArrive(String arrive);
+
+	/**
+	 *
+	 * @param arrive
+	 * @param name
+	 * @return
+	 */
+	public FerryDestination findTop1ByArriveAndName(String arrive, String name);
+
+
+	/**
+	 *
+	 * @param destination
+	 * @return
+	 */
+	public FerryDestination findByName(String destination);
+
 }

@@ -16,7 +16,7 @@ public class ReservationFerryMobileDTO {
 	private FerryDestination destination;
     private LocalDate datedepart;
     private int nbadulte;
-    private int nbstudent;
+    private int nbetudiant;
     private int nbenfant;
     private FerryTypeVehicule vehicule;
 

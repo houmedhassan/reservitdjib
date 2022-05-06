@@ -1,5 +1,6 @@
 package com.safara.web;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -290,7 +291,7 @@ public class ReservationFerryController {
 	/**
 	 * 
 	 * @param idcrypt
-	 * @return
+	 * @return Object of Reservation find by idcrypt - Using by Booking Details API,
 	 */
 	@GetMapping("/find/reservation/ferry/one")
 	public ResponseEntity<ReservationFerry> findReservation(@RequestParam("idcrypt") String idcrypt)
@@ -331,14 +332,18 @@ public class ReservationFerryController {
 			return new ResponseEntity<ReservationFerry>(HttpStatus.FORBIDDEN);
 		}
 		
-	} 
-	
-	
+	}
+
+	/**
+	 *
+	 * @param mobile
+	 * @return  method to save Reservation of the mobile APPS
+	 */
 	@PostMapping("/find/save/reservation")
 	public ResponseEntity<ReservationFerryResultDTO> saveMobileReservation(@RequestBody  ReservationFerryMobileDTO mobile){
 		
 		try {
-
+			System.out.println(mobile.getNbetudiant()+" je suis ici ");
 			System.out.println(mobile.toString());
 			
 			double somme=0;
@@ -350,8 +355,8 @@ public class ReservationFerryController {
 				if(mobile.getNbadulte() > 0 && tarif.getSfidkey() == 1)
 				{  somme += tarif.getMontant() * mobile.getNbadulte();}
 
-				if(mobile.getNbstudent() > 0 && tarif.getSfidkey() == 2)
-				{  somme += tarif.getMontant() * mobile.getNbstudent();}
+				if(mobile.getNbetudiant() > 0 && tarif.getSfidkey() == 2)
+				{  somme += tarif.getMontant() * mobile.getNbetudiant();}
 				
 				if(mobile.getNbenfant() > 0 && tarif.getSfidkey() == 3)
 				{ somme += tarif.getMontant() * mobile.getNbenfant();}
@@ -374,6 +379,7 @@ public class ReservationFerryController {
 			reservation.setDatedepart(mobile.getDatedepart());
 			reservation.setNbadult(mobile.getNbadulte());
 			reservation.setNbchild(mobile.getNbenfant());
+			reservation.setNbstudent(mobile.getNbetudiant());
 			reservation.setTypevoyagename("ALLER-SIMPLE");
 			reservation.setEtape("INITIAL");
 
@@ -388,6 +394,7 @@ public class ReservationFerryController {
 			res.setDatedepart(reservation.getDatedepart());
 			res.setNbadult(reservation.getNbadult());
 			res.setNbchild(reservation.getNbchild());
+			res.setNbstudent((reservation.getNbstudent()));
 			res.setVehiculetype(reservation.getVehiculetype());
 			res.setSomme(reservation.getMontant());
 			res.setTotal(reservation.getMontant());
@@ -405,7 +412,7 @@ public class ReservationFerryController {
 	/**
 	 *
 	 * @param idcrypt
-	 * @return  object of reservation finding by idcrypt
+	 * @return  object of reservation finding by idcrypt - Using by Booking Details API, PASSGER API,
 	 */
 	@GetMapping("/find/reservation/ferry/mobile/one")
 	public ResponseEntity<ReservationFerryResultDTO> findReservationMobile(@RequestParam("idcrypt") String idcrypt)
@@ -426,6 +433,7 @@ public class ReservationFerryController {
 			res.setDatedepart(reservation.getDatedepart());
 			res.setNbadult(reservation.getNbadult());
 			res.setNbchild(reservation.getNbchild());
+			res.setNbstudent(reservation.getNbstudent());
 			res.setVehiculetype(reservation.getVehiculetype());
 			res.setSomme(reservation.getMontant());
 			res.setTotal(reservation.getMontant());
@@ -443,22 +451,41 @@ public class ReservationFerryController {
 	/**
 	 * VERIFIER SI UN BOOKING EST POSSIBLE POUR LA DESTINATION 
 	 */
-	@GetMapping("/find/reservation/ferry/verification/destination")
-	public ResponseEntity<ParametreReservationFerry> verificationDestination(@RequestParam("date") String date)
+	@PostMapping("/find/reservation/ferry/verification/destination")
+	public ResponseEntity<ParametreReservationFerry> verificationDestination(@RequestParam("date") String date, @RequestBody FerryDestination destination)
 	{
 		try {
-			
 			String jour = LocalDate.parse(date).getDayOfWeek().name();
 			System.out.println("DATE : "+date+ " JOUR : "+jour);
 			
-			ParametreReservationFerry ferry = parametreReservationFerryRepository.findByJour(jour);
+			ParametreReservationFerry ferry = parametreReservationFerryRepository.findByJourAndDestination(jour, destination);
+
+			if(ferry == null)
+			{
+				FerryDestination destination1 = ferryDestinationRepository.findTop1ByArriveAndName(destination.getName(), destination.getArrive());
+
+				ferry = parametreReservationFerryRepository.findByJourAndDestination(jour, destination1);
+			}
 			
 			return new ResponseEntity<ParametreReservationFerry>(ferry, HttpStatus.OK);
 		}catch(Exception ex)
 		{
+			ex.printStackTrace();
 			return new ResponseEntity<ParametreReservationFerry>(HttpStatus.FORBIDDEN);
 		}
 
+	}
+
+
+	@GetMapping("reservations/en/cours")
+	public ResponseEntity<List<ReservationFerry>> listReservation(Principal principal)
+	{
+		try{
+			List<ReservationFerry> reservations = reservationFerryRepository.findByEtape("INITIAL");
+			return new ResponseEntity<List<ReservationFerry>>(reservations, HttpStatus.OK);
+		}catch (Exception ex){
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
 	}
 	
 }

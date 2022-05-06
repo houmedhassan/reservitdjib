@@ -10,9 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class ReservationFerryResultDTO {
 	
     private String  destination;
@@ -21,6 +19,7 @@ public class ReservationFerryResultDTO {
 
     private int nbadult;
     private int nbchild;
+    private int nbstudent;
 
     private String vehiculetype;
     

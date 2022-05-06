@@ -1,6 +1,7 @@
 package com.safara.security;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,15 +20,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import com.safara.security.entities.LoginForm;
@@ -65,44 +61,135 @@ public class Authentification {
 	  
 	  
 	  @PostMapping("/signin")
-	  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
-	 
-		  System.out.println("**************** je suis ciiiiii ************** ");
-	    Authentication authentication = authenticationManager.authenticate(
-	        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-	 
-	    SecurityContextHolder.getContext().setAuthentication(authentication);
-	 
-	    String jwt = jwtProvider.generateJwtToken(authentication);
-	    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-	 
-	    return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+	  public ResponseEntity<?> authenticateUser(@Valid @RequestBody JSONObject loginRequest) {
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.get("email").toString(), loginRequest.get("password").toString()));
+
+			System.out.println(authentication.getAuthorities() + " authoritie " + authentication.getName());
+
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String jwt = jwtProvider.generateJwtToken(authentication);
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+			Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+			User user1 = user.get();
+			user1.setToken(jwt);
+			user1.setExpire(false);
+
+			userRepository.save(user1);
+
+			return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+
+		}catch (Exception ex)
+		{
+			ex.printStackTrace();
+			return  ResponseEntity.ok("error");
+		}
 	  }
+
+	@PostMapping("/signup")
+	public ResponseEntity<String> creationdecompte(@Valid @RequestBody JSONObject userRequest) {
+		try {
+			System.out.println(userRequest);
+
+			User user = new User();
+			user.setUsername(userRequest.get("tel").toString());
+			user.setEmail(userRequest.get("email") != null ? userRequest.get("email").toString() :  "");
+			user.setPassword (encoder.encode(userRequest.get("password").toString()));
+			user.setCreated(LocalDateTime.now());
+			user.setExpire(true);
+			userRepository.save(user);
+
+			//authenticateUser(userRequest);
+
+
+			return new ResponseEntity<>(HttpStatus.OK);
+		}catch (Exception ex){
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+	}
 	  
 	  @RequestMapping(value="/profil", method= RequestMethod.GET)
 	  public ResponseEntity<User> profil(Principal principal)
 	  {
 		  try {
-			  //System.out.println(principal.getName());
-			  Optional<User> user= userRepository.findByUsername(principal.getName());
+			  //System.out.println(principal);
+			 Optional<User> user= userRepository.findByUsername(principal.getName());
 			  return new ResponseEntity<User>(user.get(), HttpStatus.OK);
+		  }catch(UsernameNotFoundException exfound){
+			  exfound.getMessage();
+			  return new ResponseEntity<User>(HttpStatus.UNAUTHORIZED);
 		  }catch(Exception ex)
 		  {
 			  ex.printStackTrace();
 			  return new ResponseEntity<User>(HttpStatus.FORBIDDEN);
 		  }
 	  }
+
+
+
+
+	@RequestMapping(value="/profil/One", method= RequestMethod.POST)
+	public ResponseEntity<User> profilOne(@RequestParam("username") String username, @RequestBody JSONObject json, Principal principal)
+	{
+		try {
+			//System.out.println(principal.getName());
+			Optional<User> user= userRepository.findByUsername(principal.getName());
+			System.out.println(user.get().getUsername());
+
+			User user1 = user.get();
+			user1.setEmail(json.get("nouveaumail").toString());
+			userRepository.save(user1);
+
+			System.out.println(json);
+
+			return new ResponseEntity<User>(user.get(), HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+			return new ResponseEntity<User>(HttpStatus.FORBIDDEN);
+		}
+	}
+
+
+	@RequestMapping(value="/profil/num", method= RequestMethod.POST)
+	public ResponseEntity<User> profilNum(@RequestParam("username") String username, @RequestBody JSONObject json, Principal principal)
+	{
+		try {
+			//System.out.println(principal.getName());
+			Optional<User> user= userRepository.findByUsername(principal.getName());
+			System.out.println(user.get().getUsername());
+
+			User user1 = user.get();
+			user1.setUsername(json.get("nouveaunum").toString());
+			userRepository.save(user1);
+
+			System.out.println(json);
+
+			return new ResponseEntity<User>(user.get(), HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+			return new ResponseEntity<User>(HttpStatus.FORBIDDEN);
+		}
+	}
 	  
 	  
 		@RequestMapping(value="/update/password", method=RequestMethod.POST)
 		public ResponseEntity<User> updatepassword(@RequestBody JSONObject json,  Principal principal)
 		{
 			try {
-				System.out.println(json.get("ancienpassword").toString());			
+				System.out.println(json.get("motdepasse").toString());
+				if(json.get("nouveaupassword").toString() == json.get("confirmationpassword").toString())
+				{
+					return new ResponseEntity<User>(HttpStatus.UNAUTHORIZED);
+				}
+
 				Optional<User> user= userRepository.findByUsername(principal.getName());
 				
 			    Authentication authentication = authenticationManager.authenticate(
-			            new UsernamePasswordAuthenticationToken(user.get().getUsername(), json.get("ancienpassword").toString()));
+			            new UsernamePasswordAuthenticationToken(user.get().getUsername(), json.get("motdepasse").toString()));
 				
 				if(authentication == null)
 				{
@@ -110,7 +197,7 @@ public class Authentification {
 					
 				}
 				User user1 = userRepository.findByUsername(principal.getName()).get();
-				user1.setPassword(encoder.encode(json.get("password").toString()));
+				user1.setPassword(encoder.encode(json.get("nouveaupassword").toString()));
 				userRepository.save(user1);
 				
 				return new ResponseEntity<User>(user1, HttpStatus.OK);

@@ -28,4 +28,11 @@ public interface ReservationFerryRepository extends JpaRepository<ReservationFer
 	 * @return
 	 */
 	public ReservationFerry findByIdcrypt(String idcrypt);
+
+	/**
+	 *
+	 * @param etape
+	 * @return
+	 */
+	public List<ReservationFerry> findByEtape(String etape);
 }
