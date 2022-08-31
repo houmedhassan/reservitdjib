@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
+import com.safara.entities.ParametreReservationFerry;
+import com.safara.repository.ParametreReservationFerryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import com.safara.repository.FerryTarifRepository;
 import com.safara.repository.FerryTypeCarsRepository;
 import com.safara.security.repository.RoleRepository;
 import com.safara.security.repository.UserRepository;
+
+import javax.print.attribute.standard.Destination;
 
 @CrossOrigin(origins = "*", maxAge = 360)
 @RestController
@@ -42,6 +46,9 @@ public class HomeController {
 	
 	@Autowired
 	private RoleRepository roleRepository;
+
+	@Autowired
+	private ParametreReservationFerryRepository parametreReservationFerryRepository;
 	
 	
 	@GetMapping("/liste/tarrif/save")
@@ -130,6 +137,17 @@ public class HomeController {
 			
 			
 			ferryDestinationRepository.save(ferry);
+
+			ferry = new FerryDestination();
+
+			ferry.setName("DJIBOUTI");
+			ferry.setArrive("TADJOURAH");
+			ferry.setCreatedat(LocalDateTime.now());
+			ferry.setUpdatedat(LocalDateTime.now());
+
+
+			ferryDestinationRepository.save(ferry);
+
 			
 			ferry = new FerryDestination();
 			
@@ -141,15 +159,7 @@ public class HomeController {
 			
 			ferryDestinationRepository.save(ferry);
 			
-			ferry = new FerryDestination();
-			
-			ferry.setName("DJIBOUTI");
-			ferry.setArrive("TADJOURAH");
-			ferry.setCreatedat(LocalDateTime.now());
-			ferry.setUpdatedat(LocalDateTime.now());
-			
-			
-			ferryDestinationRepository.save(ferry);
+
 			
 			ferry = new FerryDestination();
 			
@@ -167,8 +177,82 @@ public class HomeController {
 			return new ResponseEntity<List<FerryDestination>>(HttpStatus.FORBIDDEN);
 		}
 	}
-	
-	
-	
+
+
+
+	@GetMapping("/liste/destination/parametre/save")
+	public ResponseEntity<List<FerryDestination>> parametrageFerry()
+	{
+		try {
+
+
+			FerryDestination d1 = ferryDestinationRepository.findBySfidkey(1);
+			FerryDestination d3 = ferryDestinationRepository.findBySfidkey(3);
+			//FerryDestination d2 = ferryDestinationRepository.findBySfidkey(3);
+
+			List<ParametreReservationFerry> pars = parametreReservationFerryRepository.findAll();
+
+			for(ParametreReservationFerry p : pars)
+			{
+				//p.setDestination(d2);
+				parametreReservationFerryRepository.delete(p);
+			}
+
+			ParametreReservationFerry p1 = new ParametreReservationFerry();
+			p1.setJour("FRIDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d1);
+			parametreReservationFerryRepository.save(p1);
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("SATURDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d1);
+			parametreReservationFerryRepository.save(p1);
+
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("SUNDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d3);
+			parametreReservationFerryRepository.save(p1);
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("MONDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d3);
+			parametreReservationFerryRepository.save(p1);
+
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("TUESDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d1);
+			parametreReservationFerryRepository.save(p1);
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("WEDNESDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d3);
+			parametreReservationFerryRepository.save(p1);
+
+			p1 = new ParametreReservationFerry();
+			p1.setJour("THURSDAY");
+			p1.setCreatedat(LocalDateTime.now());
+			p1.setDestination(d1);
+			parametreReservationFerryRepository.save(p1);
+
+
+
+
+
+			return new ResponseEntity<List<FerryDestination>>( ferryDestinationRepository.findAll(), HttpStatus.OK);
+		}catch(Exception ex)
+		{
+			return new ResponseEntity<List<FerryDestination>>(HttpStatus.FORBIDDEN);
+		}
+	}
+
+
 
 }

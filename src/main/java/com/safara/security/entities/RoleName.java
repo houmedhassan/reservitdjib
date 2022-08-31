@@ -6,7 +6,7 @@ public enum RoleName {
 	ROLE_PM,
 	ROLE_ADMIN,
 	
-	ROLE_PAIE,
+	ROLE_VISITEUR,
 	ROLE_MANAGER,
 	
 	ROLE_STAFF_CONTROL

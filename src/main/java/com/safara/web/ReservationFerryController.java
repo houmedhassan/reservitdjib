@@ -3,9 +3,14 @@ package com.safara.web;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import ch.qos.logback.core.net.SyslogOutputStream;
+import com.safara.entities.dto.RapportInProgressDTO;
+import com.safara.security.entities.User;
+import com.safara.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +72,9 @@ public class ReservationFerryController {
 	
 	@Autowired
     PasswordEncoder encoder;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	
 	
@@ -340,12 +348,23 @@ public class ReservationFerryController {
 	 * @return  method to save Reservation of the mobile APPS
 	 */
 	@PostMapping("/find/save/reservation")
-	public ResponseEntity<ReservationFerryResultDTO> saveMobileReservation(@RequestBody  ReservationFerryMobileDTO mobile){
+	public ResponseEntity<ReservationFerryResultDTO> saveMobileReservation(@RequestBody  ReservationFerryMobileDTO mobile, Principal principal){
 		
 		try {
+			ReservationFerryResultDTO res = new ReservationFerryResultDTO();
+			ReservationFerry reservation  = new ReservationFerry();
 			System.out.println(mobile.getNbetudiant()+" je suis ici ");
 			System.out.println(mobile.toString());
-			
+			try {
+				Optional<User> user = userRepository.findByUsername(principal.getName());
+				if(user.get() != null)
+					reservation.setCreated(user.get());
+			}catch(Exception exx){
+				getMessage();
+				exx.printStackTrace();
+				//return new ResponseEntity<ReservationFerryResultDTO>(HttpSt;
+			}
+
 			double somme=0;
 			
 			List<FerryTarif> tarrifs =ferryTarifRepository.findAll();			
@@ -362,8 +381,8 @@ public class ReservationFerryController {
 				{ somme += tarif.getMontant() * mobile.getNbenfant();}
 			}
 
-			ReservationFerryResultDTO res = new ReservationFerryResultDTO();
-			ReservationFerry reservation  = new ReservationFerry();
+
+
 			
 			if(mobile.getVehicule()!=null)
 			{
@@ -418,6 +437,8 @@ public class ReservationFerryController {
 	public ResponseEntity<ReservationFerryResultDTO> findReservationMobile(@RequestParam("idcrypt") String idcrypt)
 	{
 		try {
+
+
 			ReservationFerry reservation = reservationFerryRepository.findByIdcrypt(idcrypt);
 			
 
@@ -478,14 +499,66 @@ public class ReservationFerryController {
 
 
 	@GetMapping("reservations/en/cours")
-	public ResponseEntity<List<ReservationFerry>> listReservation(Principal principal)
+	public ResponseEntity<List<RapportInProgressDTO>> listReservation(Principal principal)
 	{
 		try{
-			List<ReservationFerry> reservations = reservationFerryRepository.findByEtape("INITIAL");
-			return new ResponseEntity<List<ReservationFerry>>(reservations, HttpStatus.OK);
+
+			List<RapportInProgressDTO> rapports = new ArrayList<RapportInProgressDTO>();
+
+			Optional<User> user = userRepository.findByUsername(principal.getName());
+
+			List<ReservationFerry> reservations = reservationFerryRepository.findByCreatedAndEtape(user.get(),"INITIAL");
+			for(ReservationFerry ferry : reservations)
+			{
+				System.out.println(ferry.getSafkey()+" -- "+ferry.getDestination()+" --- "+ferry.getDatedepart()+" -- "+ferry.getEtape());
+				RapportInProgressDTO  in = new RapportInProgressDTO();
+				in.setRef(ferry.getSafkey());
+				in.setDestination(ferry.getDestination());
+				in.setDatedepart(ferry.getDatedepart());
+				in.setMontant(ferry.getMontant());
+				in.setIdcrypt(ferry.getIdcrypt());
+				rapports.add(in);
+			}
+
+			return new ResponseEntity<List<RapportInProgressDTO>>(rapports, HttpStatus.OK);
 		}catch (Exception ex){
-			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+			ex.printStackTrace();
+			return new ResponseEntity<List<RapportInProgressDTO>>(HttpStatus.FORBIDDEN);
 		}
 	}
-	
+
+	@GetMapping("reservations/complet")
+	public ResponseEntity<List<RapportInProgressDTO>> listReservationComplet(Principal principal)
+	{
+		try{
+
+			Optional<User> user = userRepository.findByUsername(principal.getName());
+
+
+			List<RapportInProgressDTO> rapports = new ArrayList<RapportInProgressDTO>();
+			List<ReservationFerry> reservations = reservationFerryRepository.findByCreatedAndEtape(user.get(), "COMPLET");
+			for(ReservationFerry ferry : reservations)
+			{
+				System.out.println(ferry.getSafkey()+" -- "+ferry.getDestination()+" --- "+ferry.getDatedepart()+" -- "+ferry.getEtape());
+				RapportInProgressDTO  in = new RapportInProgressDTO();
+				in.setRef(ferry.getSafkey());
+				in.setDestination(ferry.getDestination());
+				in.setDatedepart(ferry.getDatedepart());
+				in.setMontant(ferry.getMontant());
+				in.setIdcrypt(ferry.getIdcrypt());
+				rapports.add(in);
+			}
+
+			return new ResponseEntity<List<RapportInProgressDTO>>(rapports, HttpStatus.OK);
+		}catch (Exception ex){
+			return new ResponseEntity<List<RapportInProgressDTO>>(HttpStatus.FORBIDDEN);
+		}
+	}
+
+
+
+	public ResponseEntity<String> getMessage(){
+		return new ResponseEntity<String>("UNE ERREUR C es PRODUIT", HttpStatus.FORBIDDEN);
+	}
+
 }

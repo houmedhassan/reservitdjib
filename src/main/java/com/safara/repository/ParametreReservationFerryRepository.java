@@ -26,6 +26,8 @@ public interface ParametreReservationFerryRepository extends JpaRepository<Param
 	 */
 	ParametreReservationFerry  findByJourAndDestination(String jour, FerryDestination destination);
 
+	List<ParametreReservationFerry>  findByDestination(FerryDestination destination);
+
 	/**
 	 * 
 	 */

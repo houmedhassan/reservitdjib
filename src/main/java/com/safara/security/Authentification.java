@@ -63,8 +63,16 @@ public class Authentification {
 	  @PostMapping("/signin")
 	  public ResponseEntity<?> authenticateUser(@Valid @RequestBody JSONObject loginRequest) {
 		try {
+
+			User login = userRepository.findByEmail(loginRequest.get("email").toString());
+
+			 if(login ==  null )
+			 {
+				 login = userRepository.findByTel(loginRequest.get("email").toString());
+			 }
+
 			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(loginRequest.get("email").toString(), loginRequest.get("password").toString()));
+					new UsernamePasswordAuthenticationToken(login.getUsername(), loginRequest.get("password").toString()));
 
 			System.out.println(authentication.getAuthorities() + " authoritie " + authentication.getName());
 
@@ -88,24 +96,41 @@ public class Authentification {
 		}
 	  }
 
-	@PostMapping("/signup")
+	@PostMapping("/signup/visiteur")
 	public ResponseEntity<String> creationdecompte(@Valid @RequestBody JSONObject userRequest) {
 		try {
 			System.out.println(userRequest);
 
+			PasswordEncoder encoder = new BCryptPasswordEncoder();
+			//String username =  encoder.encode()
+
+			Optional <RoleUser> role_visiteur = roleRepository.findByName(RoleName.ROLE_VISITEUR);
+
+
 			User user = new User();
 			user.setUsername(userRequest.get("tel").toString());
+			user.setTel(userRequest.get("tel").toString());
 			user.setEmail(userRequest.get("email") != null ? userRequest.get("email").toString() :  "");
 			user.setPassword (encoder.encode(userRequest.get("password").toString()));
 			user.setCreated(LocalDateTime.now());
 			user.setExpire(true);
 			userRepository.save(user);
 
+			Set<RoleUser> roles = new HashSet<RoleUser>();
+			roles.add(role_visiteur.get());
+			user.setRoles(roles);
+
+			user.setUsername(encoder.encode(user.getId()+""));
+			userRepository.save(user);
+
+
+
 			//authenticateUser(userRequest);
 
 
 			return new ResponseEntity<>(HttpStatus.OK);
 		}catch (Exception ex){
+			ex.printStackTrace();
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 	}
@@ -126,8 +151,6 @@ public class Authentification {
 			  return new ResponseEntity<User>(HttpStatus.FORBIDDEN);
 		  }
 	  }
-
-
 
 
 	@RequestMapping(value="/profil/One", method= RequestMethod.POST)
@@ -162,7 +185,7 @@ public class Authentification {
 			System.out.println(user.get().getUsername());
 
 			User user1 = user.get();
-			user1.setUsername(json.get("nouveaunum").toString());
+			user1.setTel(json.get("nouveaunum").toString());
 			userRepository.save(user1);
 
 			System.out.println(json);
